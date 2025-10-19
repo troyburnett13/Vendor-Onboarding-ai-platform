@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Invoice Check</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;max-width:720px;margin:32px auto;padding:0 16px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;margin-bottom:16px}
+    .row{display:flex;gap:12px;align-items:center;margin:8px 0}
+    .ok{color:green}.bad{color:#b00020}
+    pre{background:#f7f7f7;padding:12px;border-radius:8px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>Invoice vs Receipts</h1>
+  <div class="card">
+    <form id="form">
+      <div class="row">
+        <label>Vendor Email <input name="vendor_email" type="email" required></label>
+      </div>
+      <div class="row">
+        <label>Company <input name="company" type="text"></label>
+      </div>
+      <div class="row">
+        <label>Invoice Total ($) <input name="invoice_total" type="number" step="0.01" required></label>
+      </div>
+      <div class="row">
+        <label>Receipts <input name="receipts" type="file" accept=".png,.jpg,.jpeg" multiple required></label>
+      </div>
+      <button>Check</button>
+    </form>
+  </div>
+
+  <div id="out" class="card" style="display:none"></div>
+
+  <script>
+    const API = "http://localhost:3001/api/invoice/check";
+    const form = document.getElementById("form");
+    const out = document.getElementById("out");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      out.style.display = "block";
+      out.innerHTML = "Processing…";
+
+      try {
+        const res = await fetch(API, { method: "POST", body: fd });
+        const data = await res.json();
+
+        if (!data.ok) {
+          out.innerHTML = `<p class="bad">Error: ${data.error || "Unknown error"}</p>`;
+          return;
+        }
+
+        out.innerHTML = `
+          <h3>Result</h3>
+          <p>Status: ${data.pass ? '<b class="ok">PASS</b>' : '<b class="bad">FAIL</b>'}</p>
+          <p>Invoice total: $${Number(data.invoice_total).toFixed(2)}</p>
+          <p>Receipts total: $${Number(data.receipts_total).toFixed(2)}</p>
+          <p>Delta: $${Number(data.delta).toFixed(2)}</p>
+          <h4>Details</h4>
+          <pre>${JSON.stringify(data.receipts, null, 2)}</pre>
+          <p>Saved invoice id: <b>${data.id}</b></p>
+        `;
+      } catch (err) {
+        out.innerHTML = `<p class="bad">Request failed: ${err}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
