@@ -6,7 +6,6 @@ import cors from "cors";
 // Route handlers & DB helpers
 import formWebhook from "./routes/formWebhook.js";
 import { receiptsUpload, checkInvoice } from "./routes/invoiceCheck.js";
-import { listSubmissions, getSubmission, listInvoices, getInvoice } from "./db.js";
 import { listSubmissions, getSubmission, listInvoices, getInvoice } from "./db.pg.js";
 // 1) Load env
 dotenv.config();
