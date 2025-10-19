@@ -7,12 +7,13 @@ import cors from "cors";
 import formWebhook from "./routes/formWebhook.js";
 import { receiptsUpload, checkInvoice } from "./routes/invoiceCheck.js";
 import { listSubmissions, getSubmission, listInvoices, getInvoice } from "./db.js";
-
+import { listSubmissions, getSubmission, listInvoices, getInvoice } from "./db.pg.js";
 // 1) Load env
 dotenv.config();
 
 // 2) Create app BEFORE registering any routes
 const app = express();
+app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
 // 3) Routes (order here doesn't matter, but must come after app is created)
